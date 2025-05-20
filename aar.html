@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>After Action Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .section-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://unpkg.com/es6-promise@4.2.8/dist/es6-promise.auto.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <style>
+      /* Custom styles for PDF content to match the HTML design */
+      .pdf-title {
+        font-size: 20px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #3b82f6; /* Tailwind's blue-600 */
+        margin-bottom: 16px; /* Tailwind's mb-6 */
+        text-align: center;
+      }
+      .pdf-section-title {
+        font-size: 18px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: #4b5563; /* Tailwind's gray-700 */
+        margin-bottom: 12px; /* Tailwind's mb-3 */
+      }
+      .pdf-label {
+        font-size: 12px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        color: #4b5563; /* Tailwind's gray-700 */
+        margin-bottom: 4px; /* Tailwind's mb-2 */
+        display: block;
+      }
+      .pdf-text {
+        font-size: 12px;
+        font-family: 'Inter', sans-serif;
+        color: #4b5563; /* Tailwind's gray-700 */
+        margin-bottom: 8px; /* Tailwind's mb-2 */
+        line-height: 1.5;
+      }
+      .pdf-attachment-title{
+        font-size: 12px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        color: #4b5563;
+        margin-top: 10px;
+        margin-bottom: 5px;
+      }
+       .pdf-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-6 rounded-lg">
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <h1 class="text-2xl font-semibold text-blue-600 mb-6 text-center section-title">After Action Report</h1>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3 section-title">Mission Information</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="mission-name" class="block text-gray-700 text-sm font-bold mb-2">Mission Name:</label>
+                    <input type="text" id="mission-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter Mission Name">
+                </div>
+                <div class="flex flex-col">
+                    <label for="date" class="block text-gray-700 text-sm font-bold mb-2">Date:</label>
+                    <div class="flex space-x-2">
+                        <input type="date" id="date" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <input type="time" id="hour" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="HH:MM" pattern="([0-9]{2}:[0-9]{2})" min="00:00" max="23:59" step="60">
+                    </div>
+                </div>
+                <div>
+                    <label for="location" class="block text-gray-700 text-sm font-bold mb-2">Location:</label>
+                    <input type="text" id="location" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter Location">
+                </div>
+                 <div>
+                    <label for="team-members" class="block text-gray-700 text-sm font-bold mb-2">Team Members:</label>
+                    <input type="text" id="team-members" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter Team Members (comma-separated)">
+                </div>
+                <div>
+                    <label for="officer-name" class="block text-gray-700 text-sm font-bold mb-2">Approving Officer Name:</label>
+                    <input type="text" id="officer-name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Enter Approving Officer Name">
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3 section-title">Objectives</h2>
+            <div id="objectives-container" class="space-y-4">
+                <div class="flex items-center space-x-4 objective-row">
+                    <textarea id="goal-1" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-10 resize-y goal-text" placeholder="Enter objective 1..."></textarea>
+                    <input type="checkbox" id="objective-1-achieved" class="h-5 w-5 text-green-600 rounded objective-check">
+                    <label for="objective-1-achieved" class="text-gray-700 text-sm font-medium">Achieved</label>
+                    <button class="remove-objective text-red-500 hover:text-red-700 focus:outline-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <button id="add-objective" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Add Objective
+            </button>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3 section-title">Observations</h2>
+            <textarea id="observations" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-y" placeholder="Enter your observations here..."></textarea>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3 section-title">Areas of Improvement</h2>
+            <textarea id="improvements" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-32 resize-y" placeholder="Enter areas of improvement..."></textarea>
+        </div>
+
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-3 section-title">Attachments</h2>
+            <div id="file-upload-container">
+                <label for="file-upload" class="inline-flex items-center justify-center px-5 py-3 bg-blue-600 text-white font-medium rounded-md shadow-md cursor-pointer hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors">
+                    <i class="fas fa-upload mr-2"></i>
+                    <span>Upload Files</span>
+                    <input id="file-upload" type="file" multiple class="hidden">
+                </label>
+                <p class="mt-1 text-sm text-gray-500">Supported files: PDF, Images (Max 20MB)</p>
+                <ul id="file-list" class="mt-4 space-y-2">
+                    </ul>
+            </div>
+        </div>
+
+
+
+        <div class="flex justify-center mt-8">
+            <button id="generate-pdf" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                <i class="fas fa-file-pdf mr-2"></i> Generate PDF
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const fileUpload = document.getElementById('file-upload');
+        const fileList = document.getElementById('file-list');
+        const generatePdfButton = document.getElementById('generate-pdf');
+        const missionNameInput = document.getElementById('mission-name');
+        const dateInput = document.getElementById('date');
+        const hourInput = document.getElementById('hour');
+        const locationInput = document.getElementById('location');
+        const teamMembersInput = document.getElementById('team-members');
+        const observationsInput = document.getElementById('observations');
+        const improvementsInput = document.getElementById('improvements');
+        const officerNameInput = document.getElementById('officer-name');
+        const objectivesContainer = document.getElementById('objectives-container');
+        const addObjectiveButton = document.getElementById('add-objective');
+
+        let filesArray = [];
+        let objectiveCount = 1;
+
+        fileUpload.addEventListener('change', function(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                handleFileUpload(files);
+            }
+        });
+
+        function handleFileUpload(files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/') || file.type === 'application/pdf') {
+                    if (file.size <= 20 * 1024 * 1024) { // 20MB limit
+                        filesArray.push(file);
+                        addFileToList(file);
+                    } else {
+                        alert(`File "${file.name}" is too large (max 20MB).`);
+                    }
+                } else {
+                    alert(`File "${file.name}" is not a supported file type (only images and PDFs are allowed).`);
+                }
+            }
+        }
+
+        function addFileToList(file) {
+            const listItem = document.createElement('li');
+            listItem.classList.add('flex', 'items-center', 'space-x-3', 'p-2', 'bg-gray-50', 'rounded-md', 'border', 'border-gray-200');
+
+            let fileIcon = '';
+            if (file.type.startsWith('image/')) {
+                fileIcon = `<i class="fas fa-image text-blue-500"></i>`;
+            } else if (file.type === 'application/pdf') {
+                fileIcon = `<i class="fas fa-file-pdf text-red-500"></i>`;
+            } else {
+                fileIcon = `<i class="fas fa-file text-gray-500"></i>`;
+            }
+
+            const fileNameSpan = document.createElement('span');
+            fileNameSpan.textContent = file.name;
+            fileNameSpan.classList.add('text-gray-700', 'text-sm', 'truncate');
+
+            const removeButton = document.createElement('button');
+            removeButton.innerHTML = `<i class="fas fa-trash text-gray-400 hover:text-red-500"></i>`;
+            removeButton.classList.add('ml-auto', 'cursor-pointer', 'focus:outline-none');
+            removeButton.addEventListener('click', () => {
+                removeFile(file);
+                listItem.remove();
+            });
+
+            const fileInfoDiv = document.createElement('div');
+            fileInfoDiv.classList.add('flex-1', 'min-w-0');
+            fileInfoDiv.appendChild(fileNameSpan);
+
+            listItem.innerHTML = fileIcon;
+            listItem.appendChild(fileInfoDiv);
+            listItem.appendChild(removeButton);
+            fileList.appendChild(listItem);
+        }
+
+        function removeFile(fileToRemove) {
+            filesArray = filesArray.filter(file => file !== fileToRemove);
+        }
+
+        addObjectiveButton.addEventListener('click', () => { // Corrected event listener
+            objectiveCount++;
+            const newObjectiveRow = document.createElement('div');
+            newObjectiveRow.classList.add('flex', 'items-center', 'space-x-4', 'objective-row');
+            newObjectiveRow.innerHTML = `
+                <textarea id="goal-${objectiveCount}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline h-10 resize-y goal-text" placeholder="Enter objective ${objectiveCount}..."></textarea>
+                <input type="checkbox" id="objective-${objectiveCount}-achieved" class="h-5 w-5 text-green-600 rounded objective-check">
+                <label for="objective-${objectiveCount}-achieved" class="text-gray-700 text-sm font-medium">Achieved</label>
+                <button class="remove-objective text-red-500 hover:text-red-700 focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            objectivesContainer.appendChild(newObjectiveRow);
+
+            const removeButton = newObjectiveRow.querySelector('.remove-objective');
+            removeButton.addEventListener('click', (event) => {
+                event.target.closest('.objective-row').remove();
+            });
+        });
+
+        objectivesContainer.addEventListener('click', (event) => {
+            if (event.target.classList.contains('remove-objective')) {
+                event.target.closest('.objective-row').remove();
+            }
+        });
+
+        generatePdfButton.addEventListener('click', function() {
+            const missionName = missionNameInput.value;
+            const date = dateInput.value;
+            const hour = hourInput.value;
+            const location = locationInput.value;
+            const teamMembers = teamMembersInput.value;
+            const observations = observationsInput.value;
+            const improvements = improvementsInput.value;
+            const officerName = officerNameInput.value;
+
+
+            if (!missionName || !date || !location || !observations || !improvements || !officerName) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+
+            const doc = new jspdf.jsPDF();
+            let y = 20;
+            const pageWidth = doc.internal.pageSize.width;
+            const margin = 10;
+            const pageHeight = doc.internal.pageSize.height;
+
+            // Add custom styles for PDF elements
+            doc.setFontSize(20);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor('#3b82f6');
+            doc.text('After Action Report', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor('#4b5563');
+
+            y += 10;
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Mission Information', margin, y);
+            y += 7;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+
+            doc.text(`Mission Name: ${missionName}`, margin, y);
+            y += 7;
+            doc.text(`Date: ${date}, Time: ${hour}`, margin, y);
+            y += 7;
+            doc.text(`Location: ${location}`, margin, y);
+            y += 7;
+            doc.text(`Team Members: ${teamMembers}`, margin, y);
+            y += 7;
+            doc.text(`Approving Officer: ${officerName}`, margin, y);
+            y += 10;
+
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Objectives:', margin, y);
+            y += 7;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+
+            const objectiveRows = document.querySelectorAll('.objective-row');
+            objectiveRows.forEach((row, index) => {
+                const objectiveText = row.querySelector('.goal-text').value.trim(); // Remove extra spaces
+                const objectiveAchieved = row.querySelector('.objective-check').checked;
+                const checkmark = objectiveAchieved ? '[V]' : '[X]';
+                // Check if adding this line would exceed the page height
+                if (y + 7 > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin; // Reset y to top margin
+                }
+                doc.text(`${index + 1}. ${objectiveText}  ${checkmark}`, margin, y);
+                y += 7;
+            });
+            y += 3;
+
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Observations:', margin, y);
+            y += 7;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            const observationLines = doc.splitTextToSize(observations, pageWidth - 2 * margin);
+            observationLines.forEach(line => {
+                // Check if adding this line would exceed the page height
+                if (y + 5 > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin; // Reset y to top margin
+                }
+                doc.text(line, margin, y);
+                y += 5;
+            });
+
+            y += 5;
+            doc.setFontSize(16);
+            doc.setFont('helvetica', 'bold');
+            doc.text('Areas of Improvement:', margin, y);
+            y += 7;
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            const improvementLines = doc.splitTextToSize(improvements, pageWidth - 2 * margin);
+            improvementLines.forEach(line => {
+                // Check if adding this line would exceed the page height
+                if (y + 5 > pageHeight - margin) {
+                    doc.addPage();
+                    y = margin; // Reset y to top margin
+                }
+                doc.text(line, margin, y);
+                y += 5;
+            });
+
+            if (filesArray.length > 0) {
+                y += 10;
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Attachments:', margin, y);
+                y += 7;
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+
+                // Function to handle file processing and PDF addition
+                const processFiles = (index) => {
+                    if (index < filesArray.length) {
+                        const file = filesArray[index];
+                        if (file.type.startsWith('image/')) {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                const img = new Image();
+                                img.onload = function () {
+                                    // Calculate image dimensions to fit within the page
+                                    let imgWidth = img.width;
+                                    let imgHeight = img.height;
+                                    const maxImgWidth = pageWidth - 2 * margin;
+                                    if (imgWidth > maxImgWidth) {
+                                        imgHeight = imgHeight * (maxImgWidth / imgWidth);
+                                        imgWidth = maxImgWidth;
+                                    }
+                                    // Check if adding this image would exceed the page height
+                                    if (y + imgHeight + 10 > pageHeight - margin) {
+                                        doc.addPage();
+                                        y = margin; // Reset y to top margin
+                                    }
+                                    doc.addImage(e.target.result, 'JPEG', margin, y, imgWidth, imgHeight);
+                                    y += imgHeight + 10;
+                                    doc.text(file.name, margin, y);
+                                    y += 10;
+                                    processFiles(index + 1); // Process the next file
+                                };
+                                img.src = e.target.result;
+                            }
+                            reader.readAsDataURL(file);
+                        } else if (file.type === 'application/pdf') {
+                            const reader = new FileReader();
+                            reader.onload = function (e) {
+                                //  PDF content can be complex to embed directly.  This adds a placeholder.
+                                 if (y + 10 > pageHeight - margin) {
+                                        doc.addPage();
+                                        y = margin; // Reset y to top margin
+                                    }
+                                doc.text(`PDF File: ${file.name}`, margin, y);
+                                y += 10;
+                                processFiles(index + 1); // Process the next file
+                            };
+                            reader.readAsDataURL(file);
+                        } else {
+                             if (y + 10 > pageHeight - margin) {
+                                        doc.addPage();
+                                        y = margin; // Reset y to top margin
+                                    }
+                            doc.text(`File: ${file.name}`, margin, y);
+                            y += 10;
+                            processFiles(index + 1); // Process the next file
+                        }
+                    } else {
+                        // After all files are processed, save the document
+                        saveDocument(doc, missionName);
+                    }
+                };
+
+                // Start processing the files
+                processFiles(0);
+                return; // Important: Exit the main function to prevent duplicate saving
+            }
+
+            saveDocument(doc, missionName);
+        });
+
+        function saveDocument(doc, missionName){
+             doc.save(`${missionName}.pdf`);
+        }
+    </script>
+</body>
+</html>
